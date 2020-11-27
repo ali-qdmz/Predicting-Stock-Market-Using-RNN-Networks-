@@ -1,0 +1,147 @@
+import pandas as pd
+from sklearn import preprocessing
+import numpy as np
+from keras.models import load_model
+history_points = 12
+
+def csv_to_dataset(csv_path):
+    global dimension
+    global history_points
+    global data_normaliser
+    global data_normalised
+
+    data = pd.read_csv(csv_path)
+    data = data.drop('Local time' , axis = 1)
+    data.columns = ['1. open', '2. high', '3. low', '4. close', '5. volume']
+
+    #print(df1)
+    data['ma7'] = data['4. close'].rolling(window=7).mean()
+    data['ma21'] = data['4. close'].rolling(window=21).mean()
+    
+    # Create MACD
+    data['4. close'].ewm
+    data['26ema'] = data['4. close'].ewm(span=26).mean()
+    data['12ema'] = data['4. close'].ewm(span=12).mean()
+    data['MACD'] = (data['12ema']-data['26ema'])
+
+    # Create Bollinger Bands
+    
+    data['20sd'] = data['4. close'].rolling(20).std()
+    data['upper_band'] = data['ma21'] + (data['20sd']*2)
+    data['lower_band'] = data['ma21'] - (data['20sd']*2)
+    
+    # Create Exponential moving average
+    data['ema'] = data['4. close'].ewm(com=0.5).mean()
+    
+    # Create Momentum
+    data['momentum'] = data['momentum'] = pd.to_numeric(data['4. close'], errors='coerce') - 1
+    data = data.iloc[::-1]
+    
+    for i in range(20):
+        data = data.drop(data.index[len(data)-1])
+    data = data.iloc[::-1]
+    data.index = range(len(data))
+
+    data_normaliser = preprocessing.MinMaxScaler()
+    data_normalised = data_normaliser.fit_transform(data)
+    
+    ohlcv_histories_normalised =      np.array([data_normalised[i  : i + history_points].copy() for i in range(len(data_normalised) - history_points)])
+    #next_day_open_values_normalised = np.array([data_normalised[:,0][i + history_points].copy() for i in range(len(data_normalised) - history_points)]) 
+    #next_day_open_values_normalised = np.expand_dims(next_day_open_values_normalised, -1)
+    
+    next_day_open_values = np.array([data['1. open'][i + history_points].copy() for i in range(len(data) - history_points)])
+    #next_day_open_values = next_day_open_values_normalised
+    
+    y_normaliser = preprocessing.MinMaxScaler()
+    next_day_open_values_normalised = y_normaliser.fit_transform(np.array(data['1. open'][history_points:]).reshape(-1,1))
+ 
+ 
+    
+
+  
+        
+
+
+    
+    
+    
+    assert ohlcv_histories_normalised.shape[0] == next_day_open_values_normalised.shape[0]
+    return data,ohlcv_histories_normalised, next_day_open_values_normalised, next_day_open_values,y_normaliser
+
+
+df,ohlcv_histories, next_day_open_values, unscaled_y,y_normalizer = csv_to_dataset('msft.csv')
+
+
+
+
+test_split = 0.9
+n = int(ohlcv_histories.shape[0] * test_split)
+
+ohlcv_train = ohlcv_histories[:n]
+
+y_train = next_day_open_values[:n]
+
+ohlcv_test = ohlcv_histories[n:]
+
+y_test = next_day_open_values[n:]
+
+unscaled_y_test = unscaled_y[n:]
+
+
+
+import keras
+import tensorflow as tf
+from keras.models import Model
+from keras.layers import Dense, Dropout, LSTM, Input, Activation, concatenate
+from keras import optimizers
+import numpy as np
+np.random.seed(4)
+from tensorflow import set_random_seed
+set_random_seed(4)
+
+lstm_input = Input(shape=(history_points, 15), name='lstm_input')
+x = LSTM(120, name='lstm_0')(lstm_input)
+x = Dropout(0.2, name='lstm_dropout_0')(x)
+x = Dense(80, name='dense_0')(x)
+x = Activation('sigmoid', name='sigmoid_0')(x)
+x = Dense(1, name='dense_1')(x)
+output = Activation('linear', name='linear_output')(x)
+model = Model(inputs=lstm_input, outputs=output)
+
+adam = optimizers.Adam(lr=0.0005)
+
+model.compile(optimizer=adam,
+              loss='mse')
+
+
+model.fit(x=ohlcv_train, y=y_train, batch_size=256, epochs=200, shuffle=True, validation_split=0.1)
+evaluation = model.evaluate(ohlcv_test, y_test)
+print(evaluation)
+model.save('akhaber_with_technical.h5')
+
+y = y_normalizer.inverse_transform(model.predict(ohlcv_histories))
+real_mse = np.mean(np.square(unscaled_y - y))
+print("mse is :",real_mse)
+
+l = []
+thresh = 3
+j = 200
+for i in range(int(len(y)*.9)-1,len(y)-1):
+    if y[i+1]-y[i]  > thresh and unscaled_y[i+1] - unscaled_y[i]>0:
+        l.append(True)
+    if y[i+1]-y[i]  < thresh and unscaled_y[i+1] - unscaled_y[i]<0:
+        l.append(True)
+
+print(l.count(True),"/",len(y) - int(len(y)*.9) )
+print(l.count(True)/(len(y) - int(len(y)*.9))*100)
+
+l = []
+j = 2000
+for i in range(0,2000):
+    if y[i+1]-y[i]  > thresh and unscaled_y[i+1] - unscaled_y[i]>0:
+        l.append(True)
+    if y[i+1]-y[i]  < thresh and unscaled_y[i+1] - unscaled_y[i]<0:
+        l.append(True)
+
+print(l.count(True),"/",j)
+print(l.count(True)/j*100)

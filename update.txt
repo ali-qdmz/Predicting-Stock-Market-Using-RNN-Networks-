@@ -1,0 +1,5 @@
+
+Example:
+
+sql = "UPDATE customers SET address = 'Canyon 123' WHERE address = 'Valley 345'"
+

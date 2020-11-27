@@ -1,0 +1,744 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Nov 16 14:59:31 2019
+
+@author: gadimzadeh
+"""
+
+from alpha_vantage.timeseries import TimeSeries
+import json
+
+import pandas as pd
+from sklearn import preprocessing
+import numpy as np
+history_points = 80
+
+def csv_to_dataset(csv_path):
+    global dimension
+    global history_points
+    global data_normaliser
+    global data_normalised
+
+    data = pd.read_csv(csv_path , encoding = "ISO-8859-1")
+    data = data.drop('Unnamed: 33', axis=1)
+#    data.columns = ['<TICKER>','<DTYYYYMMDD>','<OPEN>','<HIGH>','<LOW>', '<CLOSE>','<VOL>',
+#      '<TradesVAL>','<Ntrades>', '<Npaper>', '<BaseV>', '<DTYYYYMMDD (Shamsi)>',
+#      '<NBNum>', '<JBNum>', '<NSNum>', '<JSNum>','<NBVol>', '<JBVol>','<NSVol>', '<JSVol>',
+#      '<NBPercent>','<JBPercent>','<NSPercent>','<JSPercent>','<NBval>','<JBval>','<NSval>','<JSval>',
+#      '<NBAvPrice>','<JBAvPrice>','<NSAvPrice>','<eJSAvPrice>','<J-to-N>']
+    
+    
+    columnss = ['<TICKER>','<DTYYYYMMDD>','<OPEN>','<HIGH>','<LOW>', '<CLOSE>','<VOL>',
+                  '<TradesVAL>','<Ntrades>', '<Npaper>', '<BaseV>', '<DTYYYYMMDD (Shamsi)>',
+                  '<NBNum>', '<JBNum>', '<NSNum>', '<JSNum>','<NBVol>', '<JBVol>','<NSVol>', '<JSVol>',
+                  '<NBPercent>','<JBPercent>','<NSPercent>','<JSPercent>','<NBval>','<JBval>','<NSval>','<JSval>',
+                  '<NBAvPrice>','<JBAvPrice>','<NSAvPrice>','<eJSAvPrice>','<J-to-N>']
+    
+    
+    l0 = []
+    l1 = []
+    l2 = []
+    l3 = []
+    l4 = []
+    l5 = []
+    l6 = []
+    l7 = []
+    l8 = []
+    l9 = []
+    l10 = []
+    l11 = []
+    l12 = []
+    l13 = []
+    l14 = []
+    l15 = []
+    l16 = []
+    l17 = []
+    l18 = []
+    l19 = []
+    l20 = []
+    l21 = []
+    l22 = []
+    l23 = []
+    l24 = []
+    l25 = []
+    l26 = []
+    l27 = []
+    l28 = []
+    l29 = []
+    l30 = []
+    l31 = []
+    l32 = []
+    #data.loc[-1] = columnss
+    #data.index = data.index + 1  # shifting index
+    #data = data.sort_index()  # sorting by index
+    
+    df = pd.DataFrame(columns = columnss)
+    
+    df.loc[-1] = data.columns  # adding a row
+    df.index = df.index + 1  # shifting index
+    df = df.sort_index()  # sorting by index
+    #df['<OPEN>'] = [1]
+    l0.append(data.columns[0])
+    l1.append(data.columns[1])
+    l2.append(data.columns[2])
+    l3.append(data.columns[3])
+    l4.append(data.columns[4])
+    l5.append(data.columns[5])
+    l6.append(data.columns[6])
+    l7.append(data.columns[7])
+    l8.append(data.columns[8])
+    l9.append(data.columns[9])
+    l10.append(data.columns[10])
+    l11.append(data.columns[11])
+    l12.append(data.columns[12])
+    l13.append(data.columns[13])
+    l14.append(data.columns[14])
+    l15.append(data.columns[15])
+    l16.append(data.columns[16])
+    l17.append(data.columns[17])
+    l18.append(data.columns[18])
+    l19.append(data.columns[19])
+    l20.append(data.columns[20])
+    l21.append(data.columns[21])
+    l22.append(data.columns[22])
+    l23.append(data.columns[23])
+    l24.append(data.columns[24])
+    l25.append(data.columns[25])
+    l26.append(data.columns[26])
+    l27.append(data.columns[27])
+    l28.append(data.columns[28])
+    l29.append(data.columns[29])
+    l30.append(data.columns[30])
+    l31.append(data.columns[31])
+    l32.append(data.columns[32])
+    data.columns = columnss
+    for d in range(len(data)):
+        l0.append(data[columnss[0]][d])
+        l1.append(data[columnss[1]][d])
+        l2.append(data[columnss[2]][d])
+        l3.append(data[columnss[3]][d])
+        l4.append(data[columnss[4]][d])
+        l5.append(data[columnss[5]][d])
+        l6.append(data[columnss[6]][d])
+        l7.append(data[columnss[7]][d])
+        l8.append(data[columnss[8]][d])
+        l9.append(data[columnss[9]][d])
+        l10.append(data[columnss[10]][d])
+        l11.append(data[columnss[11]][d])
+        l12.append(data[columnss[12]][d])
+        l13.append(data[columnss[13]][d])
+        l14.append(data[columnss[14]][d])
+        l15.append(data[columnss[15]][d])
+        l16.append(data[columnss[16]][d])
+        l17.append(data[columnss[17]][d])
+        l18.append(data[columnss[18]][d])
+        l19.append(data[columnss[19]][d])
+        l20.append(data[columnss[20]][d])
+        l21.append(data[columnss[21]][d])
+        l22.append(data[columnss[22]][d])
+        l23.append(data[columnss[23]][d])
+        l24.append(data[columnss[24]][d])
+        l25.append(data[columnss[25]][d])
+        l26.append(data[columnss[26]][d])
+        l27.append(data[columnss[27]][d])
+        l28.append(data[columnss[28]][d])
+        l29.append(data[columnss[29]][d])
+        l30.append(data[columnss[30]][d])
+        l31.append(data[columnss[31]][d])
+        l32.append(data[columnss[32]][d])
+    
+    houseitems =]columnss[0]:l0,columnss[1]:l1,columnss[2]:l2,columnss[3]:l3,columnss[4]:l4,columnss[5]:l5,
+             columnss[6]:l6,columnss[7]:l7,columnss[8]:l8,columnss[9]:l9,columnss[10]:l0,columnss[11]:l11,
+             columnss[12]:l12,columnss[13]:l13,columnss[14]:l14,columnss[15]:l15,columnss[16]:l16,columnss[17]:l17,columnss[18]:l18,
+             columnss[19]:l19,columnss[20]:l20,columnss[21]:l21,columnss[22]:l22,columnss[23]:l23,columnss[24]:l24,
+             columnss[25]:l25,columnss[26]:l26,columnss[27]:l27,columnss[28]:l28,columnss[29]:l29,columnss[30]:l30,
+             columnss[31]:l31,columnss[32]:l32}
+        
+            
+    df1 = pd.DataFrame(houseitems)
+    
+    try:
+        df1 = df1.drop('<DTYYYYMMDD>', axis=1)
+    except:
+        pass
+    try:
+        df1 = df1.drop('Unnamed: 0', axis=1)
+    except:
+        pass
+    try:
+        df1 = df1.drop('Unnamed: 12', axis=1)
+    except:
+        pass
+    try:
+        df1 = df1.drop('<TICKER>', axis=1)
+    except:
+        pass
+    
+    
+    
+    try:
+        df1 = df1.drop('date', axis=1)
+    except:
+        pass
+
+    
+    
+    
+    df1 = df1.drop('<DTYYYYMMDD (Shamsi)>', axis=1)
+    df1 = df1.drop('<NSAvPrice>', axis=1)
+    df1 = df1.drop('<eJSAvPrice>', axis=1)
+    df1 = df1.drop('<JBAvPrice>', axis=1)
+    df1 = df1.drop('<NBAvPrice>', axis=1)
+    df1 = df1.drop('<JSval>', axis=1)
+    df1 = df1.drop('<JSPercent>', axis=1)
+    df1 = df1.drop('<NSPercent>', axis=1)
+    df1 = df1.drop('<JBPercent>', axis=1)
+    df1 = df1.drop('<NBPercent>', axis=1)
+    df1 = df1.drop('<JSVol>', axis=1)
+    df1 = df1.drop('<NSVol>', axis=1)
+    df1 = df1.drop('<JBVol>', axis=1)
+    df1 = df1.drop('<NBVol>', axis=1)
+    df1 = df1.drop('<JSNum>', axis=1)
+    df1 = df1.drop('<JBNum>', axis=1)
+    df1 = df1.drop('<BaseV>', axis=1)
+    df1 = df1.drop('<Npaper>', axis=1)
+    df1 = df1.drop('<Ntrades>', axis=1)
+    df1 = df1.drop('<TradesVAL>', axis=1)
+    df1 = df1.drop('<JBval>', axis=1)
+    try:
+        df1 = df1.drop('<DTYYYYMMDD>', axis=1)
+    except:
+        pass
+    try:
+        df1 = df1.drop('Unnamed: 0', axis=1)
+    except:
+        pass
+    try:
+        df1 = df1.drop('Unnamed: 12', axis=1)
+    except:
+        pass
+    try:
+        df1 = df1.drop('Unnamed: 33', axis=1)
+    except:
+        pass
+    try:
+        df1 = df1.drop('<TICKER>', axis=1)
+    except:
+        pass
+
+
+
+    try:
+        df1 = df1.drop('date', axis=1)
+    except:
+        pass
+    #df1 = df1.drop(0, axis=0)
+
+    df1.to_csv('ali.csv')
+    if len(data.columns) > 5:
+        df1.columns = ['1. open', '2. high', '3. low', '4. close', '5. volume','6. NBNum','7. NSNum','8. NBval','9. NSval','10. J to N']
+        dimension = 10
+    else:
+        df1.columns = ['1. open', '2. high', '3. low', '4. close', '5. volume']
+        dimension = 5
+    data_normaliser = preprocessing.MinMaxScaler()
+    data_normalised = data_normaliser.fit_transform(df1)
+    
+    ohlcv_histories_normalised =      np.array([data_normalised[i  : i + history_points].copy() for i in range(len(data_normalised) - history_points)])
+    next_day_open_values_normalised = np.array([data_normalised[:,0][i + history_points].copy() for i in range(len(data_normalised) - history_points)]) 
+    #next_day_open_values_normalised = np.expand_dims(next_day_open_values_normalised, -1)
+    
+    next_day_open_values = np.array([df1['1. open'][i + history_points].copy() for i in range(len(df1) - history_points)])
+    next_day_open_values = next_day_open_values_normalised
+    
+    #y_normaliser = preprocessing.MinMaxScaler()
+    #y_normaliser.fit_transform(np.expand_dims( next_day_open_values , -1))
+ 
+    def calc_ema(values, time_period):
+        # https://www.investopedia.com/ask/answers/122314/what-exponential-moving-average-ema-formula-and-how-ema-calculated.asp
+        sma = np.mean(values[:,3])
+        ema_values = [sma]
+        k = 2 / (1 + time_period)
+        for i in range(len(his) - time_period, len(his)):
+            close = his[i][3]
+            ema_values.append(close * k + ema_values[-1] * (1 - k))
+        return ema_values[-1]
+    
+    def rsiFunc(prices, n=14):
+        deltas = np.diff(prices)
+        seed = deltas[:n+1]
+        up = seed[seed>=0].sum()/n
+        down = -seed[seed<0].sum()/n
+        rs = up/down
+        rsi = np.zeros_like(prices)
+        rsi[:n] = 100. - 100./(1.+rs)
+    
+        for i in range(n, len(prices)):
+            delta = deltas[i-1] # cause the diff is 1 shorter
+            if delta>0:
+                upval = delta
+                downval = 0.
+            else:
+                upval = 0.
+                downval = -delta
+    
+            up = (up*(n-1) + upval)/n
+            down = (down*(n-1) + downval)/n
+    
+            rs = up/down
+            rsi[i] = 100. - 100./(1.+rs)
+    
+        return rsi
+		 
+    
+    rsi = rsiFunc(df1['4. close'].astype(float))
+    i = 0
+    technical_indicators = []
+    for his in ohlcv_histories_normalised:
+        # since we are using his[3] we are taking the SMA of the closing price
+        sma = np.mean(his[:,3])
+        macd = calc_ema(his, 12) - calc_ema(his, 26)
+        technical_indicators.append(np.array([sma,macd,rsi[i],]))   
+        
+    technical_indicators = np.array(technical_indicators)
+    global tech_ind_scaler
+    tech_ind_scaler = preprocessing.MinMaxScaler()
+    technical_indicators_normalised = tech_ind_scaler.fit_transform(technical_indicators)
+    
+    
+    
+    assert ohlcv_histories_normalised.shape[0] == next_day_open_values_normalised.shape[0] == technical_indicators_normalised.shape[0]
+    return ohlcv_histories_normalised, technical_indicators_normalised, next_day_open_values_normalised, next_day_open_values
+
+
+def inverse_return(obj):
+    trainPredict_dataset_like2 = np.zeros(shape=(len(obj), 10) )
+# put the predicted values in the right field
+    trainPredict_dataset_like2[:,0] = obj[:,0]
+# inverse transform and then select the right field
+    real = data_normaliser.inverse_transform(trainPredict_dataset_like2)[:,0]
+    return real
+
+
+
+
+ohlcv_histories, technical_indicators, next_day_open_values, unscaled_y = csv_to_dataset('etka.csv')
+
+
+test_split = 0.9
+n = int(ohlcv_histories.shape[0] * test_split)
+
+ohlcv_train = ohlcv_histories[:n]
+tech_ind_train = technical_indicators[:n]
+y_train = next_day_open_values[:n]
+
+ohlcv_test = ohlcv_histories[n:]
+tech_ind_test = technical_indicators[n:]
+y_test = next_day_open_values[n:]
+
+unscaled_y_test = unscaled_y[n:]
+
+import keras
+import tensorflow as tf
+from keras.models import Model
+from keras.layers import Dense, Dropout, LSTM, Input, Activation, concatenate
+from keras import optimizers
+import numpy as np
+np.random.seed(4)
+from tensorflow import set_random_seed
+set_random_seed(4)
+
+# define two sets of inputs
+lstm_input = Input(shape=(history_points, 10), name='lstm_input')
+dense_input = Input(shape=(technical_indicators.shape[1],), name='tech_input')
+ 
+# the first branch operates on the first input
+x = LSTM(100, name='lstm_0')(lstm_input)
+x = Dropout(0.2, name='lstm_dropout_0')(x)
+lstm_branch = Model(inputs=lstm_input, outputs=x)
+ 
+# the second branch opreates on the second input
+y = Dense(70, name='tech_dense_0')(dense_input)
+y = Activation("relu", name='tech_relu_0')(y)
+y = Dropout(0.2, name='tech_dropout_0')(y)
+technical_indicators_branch = Model(inputs=dense_input, outputs=y)
+ 
+# combine the output of the two branches
+combined = concatenate([lstm_branch.output, technical_indicators_branch.output], name='concatenate')
+ 
+z = Dense(100, activation="sigmoid", name='dense_pooling')(combined)
+z = Dense(1, activation="linear", name='dense_out')(z)
+ 
+# our model will accept the inputs of the two branches and then output a single value
+model = Model(inputs=[lstm_branch.input, technical_indicators_branch.input], outputs=z)
+
+adam = optimizers.Adam(lr=0.0005)
+
+model.compile(optimizer=adam,
+              loss='mse')
+
+
+model.fit(x=[ohlcv_train, tech_ind_train], y=y_train, batch_size=16, epochs=80, shuffle=True, validation_split=0.1)
+evaluation = model.evaluate([ohlcv_test, tech_ind_test], y_test)
+print(evaluation)
+
+
+
+
+y_test_predicted = model.predict([ohlcv_histories, technical_indicators])
+pred = inverse_return(y_test_predicted)
+
+unscaled_y.shape = y_test_predicted.shape
+
+real = inverse_return(unscaled_y)
+
+
+
+pred_buffer = pred
+real_buffer = real
+
+real_mse = np.mean(np.square(real - pred))
+scaled_mse = real_mse / (np.max(real) - np.min(real)) * 100
+
+print(real_mse , scaled_mse)
+
+start = 0
+end = 990
+
+
+buys = []
+sells = []
+thresh = 0.1
+q = 0
+x = 0
+for ohlcv, ind in zip(ohlcv_histories[start: end], technical_indicators[start: end]):
+    normalised_price_today = ohlcv[-1][0]
+    normalised_price_today = np.array([[normalised_price_today]])
+    price_today = real_buffer[q]
+    predicted = pred_buffer[q]
+    delta = predicted - price_today
+    # print(delta)
+    if delta > thresh:
+        buys.append((x, price_today))
+    elif delta < -thresh:
+        sells.append((x, price_today))
+    x += 1
+    q += 1
+
+
+
+
+def compute_earnings(buys_, sells_):
+    purchase_amt = 10
+    stock = 0
+    balance = 0
+    while len(buys_) > 0 and len(sells_) > 0:
+        if buys_[0][0] < sells_[0][0]:
+            # time to buy $10 worth of stock
+            balance -= purchase_amt
+            stock += purchase_amt / buys_[0][1]
+            buys_.pop(0)
+        else:
+            # time to sell all of our stock
+            balance += stock * sells_[0][1]
+            stock = 0
+            sells_.pop(0)
+    print(f"earnings: $]balance}")
+
+
+
+compute_earnings([b for b in buys], [s for s in sells])
+
+
+import matplotlib.pyplot as plt
+
+plt.gcf().set_size_inches(22, 15, forward=True)
+
+real = plt.plot(real_buffer[start:end], label='real')
+pred = plt.plot(pred_buffer[start:end], label='predicted')
+
+if len(buys) > 0:
+    plt.scatter(list(list(zip(*buys))[0]), list(list(zip(*buys))[1]), c='#00ff00', s=50)
+if len(sells) > 0:
+    plt.scatter(list(list(zip(*sells))[0]), list(list(zip(*sells))[1]), c='#ff0000', s=50)
+
+# real = plt.plot(unscaled_y[start:end], label='real')
+# pred = plt.plot(y_predicted[start:end], label='predicted')
+
+plt.legend(['Real', 'Predicted', 'Buy', 'Sell'])
+
+plt.show()
+
+#command to predict
+#inverse_return(model.predict([[ohlcv_histories[233]], [technical_indicators[233]]]))
+
+thresh = 0.1
+predict = []
+today = []
+
+
+start = 900
+end = 990
+
+
+
+
+columns = []
+x = 0
+for q in range(5000):
+    if end != -1:
+        iter = end - start
+    else:
+        iter = 991
+    buys = []
+    sells = []
+    for k in range(start,end):
+        
+        delta = pred_buffer[k] - real_buffer[k]
+        # print(delta)
+        if delta > thresh:
+            buys.append((x, real_buffer[k]))
+        elif delta < -thresh:
+            sells.append((x, real_buffer[k]))
+        x += 1    
+        
+        
+    def compute_earnings(buys_, sells_):
+        purchase_amt = 10
+        stock = 0
+        balance = 0
+        while len(buys_) > 0 and len(sells_) > 0:
+            if buys_[0][0] < sells_[0][0]:
+                # time to buy $10 worth of stock
+                balance -= purchase_amt
+                stock += purchase_amt / buys_[0][1]
+                buys_.pop(0)
+            else:
+                # time to sell all of our stock
+                balance += stock * sells_[0][1]
+                stock = 0
+                sells_.pop(0)
+        #print(f"earnings: $]balance}")
+        return balance
+    
+    
+    
+    blc = compute_earnings([b for b in buys], [s for s in sells])
+    columns.append((blc,thresh))
+    thresh = thresh + 0.1
+y = dict(columns)
+y_1 = np.array(list(y.keys()))
+print("get ",y_1.max(),"for thresh = ",y[y_1.max()])
+
+
+################
+
+
+
+thresh = 0.1
+predict = []
+today = []
+
+
+start = 900
+end = 990
+
+
+
+
+columns = []
+x = 0
+#for ohlcv, ind in zip(ohlcv_histories[start: end], technical_indicators[start: end]):
+#    normalised_price_today = ohlcv[-1][0]
+#    normalised_price_today = np.array([[normalised_price_today]])
+#    price_today = inverse_return(normalised_price_today)
+#    today.append(price_today)
+#    predicted = np.squeeze(inverse_return( model.predict([[ohlcv], [ind]])))
+#    predict.append(predicted)
+
+
+
+def optimizer(start=0,end=len(pred_buffer),epoch=5000,thresh = 0.1,step=0.1):
+
+   
+    columns = []
+    x = 0
+    for q in range(5000):
+        if end != -1:
+            iter = end - start
+        else:
+            iter = 991
+        buys = []
+        sells = []
+        for k in range(start,end):
+            
+            delta = pred_buffer[k] - real_buffer[k]
+            # print(delta)
+            if delta > thresh:
+                buys.append((x, real_buffer[k]))
+            elif delta < -thresh:
+                sells.append((x, real_buffer[k]))
+            x += 1    
+            
+            
+        def compute_earnings(buys_, sells_):
+            purchase_amt = 10
+            stock = 0
+            balance = 0
+            while len(buys_) > 0 and len(sells_) > 0:
+                if buys_[0][0] < sells_[0][0]:
+                    # time to buy $10 worth of stock
+                    balance -= purchase_amt
+                    stock += purchase_amt / buys_[0][1]
+                    buys_.pop(0)
+                else:
+                    # time to sell all of our stock
+                    balance += stock * sells_[0][1]
+                    stock = 0
+                    sells_.pop(0)
+            #print(f"earnings: $]balance}")
+            return balance
+        
+        
+        
+        blc = compute_earnings([b for b in buys], [s for s in sells])
+        columns.append((blc,thresh))
+        thresh = thresh + step
+    y = dict(columns)
+    y_1 = np.array(list(y.keys()))
+    print("get ",y_1.max(),"for thresh = ",y[y_1.max()])
+    
+    
+    
+    
+def grapher(start=0,end=len(pred_buffer),thresh=0.1):
+    
+    buys = []
+    sells = []
+    q = start
+    x = 0
+    for ohlcv, ind in zip(ohlcv_histories[start: end], technical_indicators[start: end]):
+        normalised_price_today = ohlcv[-1][0]
+        normalised_price_today = np.array([[normalised_price_today]])
+        price_today = real_buffer[q]
+        predicted = pred_buffer[q]
+        delta = predicted - price_today
+        # print(delta)
+        if delta > thresh:
+            buys.append((x, price_today))
+        elif delta < -thresh:
+            sells.append((x, price_today))
+        x += 1
+        q += 1
+    
+    
+    
+    
+    def compute_earnings(buys_, sells_):
+        purchase_amt = 10
+        stock = 0
+        balance = 0
+        while len(buys_) > 0 and len(sells_) > 0:
+            if buys_[0][0] < sells_[0][0]:
+                # time to buy $10 worth of stock
+                balance -= purchase_amt
+                stock += purchase_amt / buys_[0][1]
+                buys_.pop(0)
+            else:
+                # time to sell all of our stock
+                balance += stock * sells_[0][1]
+                stock = 0
+                sells_.pop(0)
+        print(f"earnings: $]balance}")
+    
+    
+    
+    compute_earnings([b for b in buys], [s for s in sells])
+    
+    
+    import matplotlib.pyplot as plt
+    
+    plt.gcf().set_size_inches(22, 15, forward=True)
+    
+    real = plt.plot(real_buffer[start:end], label='real')
+    pred = plt.plot(pred_buffer[start:end], label='predicted')
+    
+    if len(buys) > 0:
+        plt.scatter(list(list(zip(*buys))[0]), list(list(zip(*buys))[1]), c='#00ff00', s=50)
+    if len(sells) > 0:
+        plt.scatter(list(list(zip(*sells))[0]), list(list(zip(*sells))[1]), c='#ff0000', s=50)
+    
+    # real = plt.plot(unscaled_y[start:end], label='real')
+    # pred = plt.plot(y_predicted[start:end], label='predicted')
+    
+    plt.legend(['Real', 'Predicted', 'Buy', 'Sell'])
+    
+    plt.show()
+    
+    
+    
+    
+#=====================================================================
+def test(thresh,start = 0,end = 990):
+    q = start
+    
+    
+    buys = []
+    sells = []
+
+    x = 0
+    for ohlcv, ind in zip(ohlcv_histories[start: end], technical_indicators[start: end]):
+        normalised_price_today = ohlcv[-1][0]
+        normalised_price_today = np.array([[normalised_price_today]])
+        price_today = real_buffer[q]
+        predicted = pred_buffer[q]
+        delta = predicted - price_today
+        # print(delta)
+        if delta > thresh:
+            buys.append((x, price_today))
+        elif delta < -thresh:
+            sells.append((x, price_today))
+        x += 1
+        q += 1
+    
+    
+    
+    
+    def compute_earnings(buys_, sells_):
+        purchase_amt = 10
+        stock = 0
+        balance = 0
+        while len(buys_) > 0 and len(sells_) > 0:
+            if buys_[0][0] < sells_[0][0]:
+                # time to buy $10 worth of stock
+                balance -= purchase_amt
+                stock += purchase_amt / buys_[0][1]
+                buys_.pop(0)
+            else:
+                # time to sell all of our stock
+                balance += stock * sells_[0][1]
+                stock = 0
+                sells_.pop(0)
+        return balance
+    
+    
+    
+    return compute_earnings([b for b in buys], [s for s in sells])    
+
+
+
+
+def maxmin(f,a,b,n,start,end):
+    import operator
+    x = []
+    for i in np.linspace(a, b, n):
+        x.append(f(i,start,end))
+    index, maximum = max(enumerate(x), key=operator.itemgetter(1))
+    index2, minimum = min(enumerate(x), key=operator.itemgetter(1))
+    x = np.linspace(a, b, n)
+    print("get ",maximum," for thresh = ",x[index])
+    print("get ",minimum," for thresh = ",x[index2])
+    
+    return (maximum,index),(minimum,index2)
+
+#print (maxmin(func, -1, 1, 100001))
